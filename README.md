@@ -10,7 +10,29 @@ Aplikasi kasir (POS) ringan dengan **tiga teknologi inti** dan **nol framework f
 
 ---
 
-## 1. Fitur yang sudah jalan
+## 1. Tampilan aplikasi
+
+Semua gambar di bawah diambil otomatis dari aplikasi yang benar-benar berjalan
+(Chrome headless + DevTools Protocol), bukan mockup.
+
+| | |
+| --- | --- |
+| **Login** | **Dashboard** |
+| ![Login](docs/screenshots/01-login.png) | ![Dashboard](docs/screenshots/02-dashboard.png) |
+| **Kasir — keranjang** | **Kasir — pembayaran** |
+| ![Kasir](docs/screenshots/04-kasir-keranjang.png) | ![Pembayaran](docs/screenshots/05-kasir-pembayaran.png) |
+| **Produk** | **Riwayat Transaksi** |
+| ![Produk](docs/screenshots/06-produk.png) | ![Transaksi](docs/screenshots/09-transaksi.png) |
+| **Stok & audit mutasi** | **Shift kasir** |
+| ![Stok](docs/screenshots/10-stok.png) | ![Shift](docs/screenshots/11-shift.png) |
+| **Pengguna & peran** | **Tampilan tablet kasir (820px)** |
+| ![Pengguna](docs/screenshots/12-pengguna.png) | ![Tablet](docs/screenshots/14-kasir-tablet.png) |
+
+Seluruh 14 gambar ada di [`docs/screenshots/`](docs/screenshots/).
+
+---
+
+## 2. Fitur yang sudah jalan
 
 - 🔐 **Login & peran** — `owner`, `admin`, `cashier`, ditegakkan lewat API Rules PocketBase (bukan sekadar menyembunyikan menu).
 - 🛒 **Kasir (POS)** — pencarian produk (nama/SKU/barcode), filter kategori, keranjang persisten, diskon nota, pajak, pembulatan, multi metode bayar, pintasan `F2` / `F9`.
@@ -24,7 +46,7 @@ Aplikasi kasir (POS) ringan dengan **tiga teknologi inti** dan **nol framework f
 
 ---
 
-## 2. Mulai cepat (1 perintah)
+## 3. Mulai cepat (1 perintah)
 
 ```bash
 npm run dev
@@ -55,15 +77,16 @@ Buka **http://127.0.0.1:3000**, lalu login memakai data contoh:
 npm start                  # jalankan hanya web server Node
 npm run pb                 # jalankan hanya PocketBase
 npm run pb:migrate         # terapkan migration secara manual
-npm run pb:seed            # isi data contoh (idempotent)
-npm run pb:adopt-users     # perbaiki user PocketBase lama agar bisa dipakai (lihat §3)
+npm run pb:seed            # data contoh (user, kategori, produk, pelanggan)
+npm run pb:seed:sales      # data contoh + 6 transaksi hari ini (agar dashboard berisi)
+npm run pb:adopt-users     # perbaiki user PocketBase lama agar bisa dipakai (lihat §4)
 npm run pb:superuser -- admin@toko.id rahasia123
 npm run check              # cek sintaks server
 ```
 
 ---
 
-## 3. Sudah punya PocketBase / akun lama?
+## 4. Sudah punya PocketBase / akun lama?
 
 **PocketBase tidak punya akun "cloud".** Setiap akun — baik *superuser* (untuk
 dashboard `/_/`) maupun *user* (untuk aplikasi) — tersimpan di dalam file
@@ -156,7 +179,7 @@ npm run pb:adopt-users -- --apply --only=email@toko.id
 
 ---
 
-## 4. Struktur proyek
+## 5. Struktur proyek
 
 ```
 .
@@ -184,7 +207,7 @@ npm run pb:adopt-users -- --apply --only=email@toko.id
 
 ---
 
-## 5. Arsitektur singkat
+## 6. Arsitektur singkat
 
 ```
 Browser (HTML/JS native)
@@ -202,7 +225,7 @@ yang diteruskan server Node. Penjelasan lengkap: [`docs/01-ARSITEKTUR.md`](docs/
 
 ---
 
-## 6. Keamanan & hak akses
+## 7. Keamanan & hak akses
 
 Aturan akses ditegakkan di **server PocketBase** (API Rules), bukan hanya di UI:
 
@@ -221,7 +244,7 @@ Kredensial superuser hanya dipakai skrip CLI (`scripts/seed.mjs`) dan
 
 ---
 
-## 7. Dokumentasi
+## 8. Dokumentasi
 
 | Dokumen | Isi |
 | --- | --- |
@@ -232,7 +255,7 @@ Kredensial superuser hanya dipakai skrip CLI (`scripts/seed.mjs`) dan
 
 ---
 
-## 8. Menuju produksi
+## 9. Menuju produksi
 
 1. Buat superuser sungguhan lalu hapus akun demo (`npm run pb:superuser -- ...`).
 2. Set `DEV=0`, bind ke `0.0.0.0`, dan letakkan di belakang reverse proxy HTTPS (Caddy/Nginx).
@@ -242,7 +265,7 @@ Kredensial superuser hanya dipakai skrip CLI (`scripts/seed.mjs`) dan
 
 ---
 
-## 9. Alternatif: Docker
+## 10. Alternatif: Docker
 
 ```bash
 docker compose up -d --build

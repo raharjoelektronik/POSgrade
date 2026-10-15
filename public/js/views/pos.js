@@ -4,7 +4,8 @@
  * Alur: cari/klik produk -> keranjang -> Bayar -> struk.
  * Stok otomatis berkurang lewat hook PocketBase (pb/pb_hooks/main.pb.js).
  */
-import { h, render, clear, debounce, setBusy } from "../lib/dom.js"
+import { h, render, clear, debounce, setBusy, appendAll } from "../lib/dom.js"
+import { icon } from "../lib/icons.js"
 import { rupiah, int, parseNumber, paymentLabel, formatDateTime } from "../lib/format.js"
 import { Cart } from "../lib/cart.js"
 import { openModal } from "../lib/modal.js"
@@ -83,7 +84,8 @@ export function PosView({ outlet, router }) {
         h(
           "div",
           { class: "cart__head" },
-          h("span", {}, "🛒 Keranjang"),
+          icon("cart", 18),
+          h("span", {}, "Keranjang"),
           h("span", { class: "badge" }, "0 item")
         ),
         cartItems,
@@ -270,7 +272,8 @@ export function PosView({ outlet, router }) {
   function renderSummary() {
     const totals = cart.totals(taxOptions())
     clear(cartSummary)
-    cartSummary.append(
+    appendAll(
+      cartSummary,
       row("Subtotal", rupiah(totals.subtotal)),
       totals.discount ? row("Diskon", "-" + rupiah(totals.discount)) : null,
       totals.tax ? row(`Pajak (${taxOptions().taxPercent}%)`, rupiah(totals.tax), true) : null,
@@ -330,9 +333,10 @@ export function PosView({ outlet, router }) {
             class: "btn btn--ghost btn--sm",
             type: "button",
             "aria-label": `Hapus ${item.name}`,
+            title: "Hapus item",
             onclick: () => cart.remove(item.productId),
           },
-          "🗑"
+          icon("trash", 16)
         )
       ),
       h("div", { class: "citem__price" }, `${rupiah(item.price)} / ${item.unit ?? "pcs"}`)
@@ -465,7 +469,8 @@ export function PosView({ outlet, router }) {
       const paid = parseNumber(paidInput.value)
 
       clear(totalsBox)
-      totalsBox.append(
+      appendAll(
+        totalsBox,
         row("Subtotal", rupiah(totals.subtotal)),
         totals.discount ? row("Diskon", "-" + rupiah(totals.discount)) : null,
         totals.tax ? row(`Pajak (${taxOptions().taxPercent}%)`, rupiah(totals.tax), true) : null,

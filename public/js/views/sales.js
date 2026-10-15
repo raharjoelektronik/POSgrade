@@ -2,7 +2,15 @@
  * views/sales.js - riwayat transaksi + detail struk + void.
  */
 import { h, render, clear, debounce } from "../lib/dom.js"
-import { rupiah, int, formatDateTime, paymentLabel, statusLabel } from "../lib/format.js"
+import {
+  rupiah,
+  int,
+  formatDateTime,
+  paymentLabel,
+  statusLabel,
+  todayRange,
+  lastDaysRange,
+} from "../lib/format.js"
 import { dataTable, skeletonTable, tableCard } from "../components/table.js"
 import { openModal, confirmDialog } from "../lib/modal.js"
 import { notify } from "../lib/toast.js"
@@ -21,21 +29,18 @@ const RANGES = [
   { value: "all", label: "Semua" },
 ]
 
+/**
+ * Filter rentang tanggal untuk riwayat transaksi.
+ *
+ * Memakai helper yang sama dengan Dashboard (`todayRange` / `lastDaysRange`)
+ * agar rentang "Hari ini" berarti 00:00–23:59, bukan "sampai detik ini".
+ * Sebelumnya dua tempat ini punya logika sendiri-sendiri dan hasilnya berbeda.
+ */
 function rangeFilter(range) {
-  const pad = (n) => String(n).padStart(2, "0")
-  const stamp = (date) =>
-    `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
-
-  const now = new Date()
-  const end = stamp(now)
   if (range === "all") return ""
 
-  const start = new Date(now)
-  start.setHours(0, 0, 0, 0)
-  if (range === "7d") start.setDate(start.getDate() - 6)
-  if (range === "30d") start.setDate(start.getDate() - 29)
-
-  return `sold_at >= ${quote(stamp(start))} && sold_at <= ${quote(end)}`
+  const { start, end } = range === "today" ? todayRange() : lastDaysRange(range === "7d" ? 7 : 30)
+  return `sold_at >= ${quote(start)} && sold_at <= ${quote(end)}`
 }
 
 export function SalesView({ outlet }) {

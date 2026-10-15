@@ -45,6 +45,13 @@
   flex: 0 0 auto;
 }
 
+/* Ikon SVG mewarisi warna teks dan tidak boleh ikut menyusut. */
+.sidebar__logo svg,
+.cart__head svg,
+.btn svg {
+  flex: 0 0 auto;
+}
+
 .sidebar__nav { display: grid; gap: 2px; }
 
 .sidebar__group {
@@ -78,7 +85,17 @@
   font-weight: 600;
 }
 
-.navlink__icon { width: 20px; text-align: center; font-size: 1rem; }
+.navlink__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  opacity: 0.85;
+}
+
+.navlink.is-active .navlink__icon { opacity: 1; }
 
 .navlink__badge {
   margin-left: auto;

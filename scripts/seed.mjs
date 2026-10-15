@@ -2,6 +2,10 @@
 /**
  * seed.mjs - isi data contoh (idempotent, aman dijalankan berulang).
  *
+ * Pakai:
+ *   node scripts/seed.mjs                  # data dasar (user, kategori, produk, pelanggan)
+ *   node scripts/seed.mjs --with-sales     # + 6 transaksi contoh hari ini
+ *
  * Prasyarat:
  *   1. PocketBase sudah berjalan  -> npm run pb
  *   2. Superuser sudah dibuat      -> npm run pb:superuser -- <email> <password>
@@ -13,6 +17,11 @@ import path from "node:path"
 import { fileURLToPath } from "node:url"
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
+
+// ------------------------------------------------------------- argumen CLI
+const args = process.argv.slice(2)
+/** --with-sales : sekaligus buat 6 transaksi contoh hari ini. */
+const WITH_SALES = args.includes("--with-sales")
 
 // ---------------------------------------------------------------- konfigurasi
 function loadEnv() {
@@ -196,7 +205,115 @@ async function main() {
     )
   }
 
+  // ------------------------------------------------- transaksi contoh (opsional)
+  if (WITH_SALES) {
+    console.log("\nTransaksi contoh:")
+    await seedDemoSales()
+  }
+
   console.log("\n✅ Seed selesai. Login dengan owner@posgrade.local / posgrade123\n")
+}
+
+/**
+ * Buat beberapa transaksi contoh hari ini (dipakai dengan flag --with-sales).
+ * Berguna agar Dashboard & Riwayat Transaksi langsung ada isinya saat demo.
+ */
+async function seedDemoSales() {
+  const existing = await api("/api/collections/sales/records", { query: { perPage: 1 } })
+  if (existing.totalItems > 0) {
+    console.log("  • Sudah ada transaksi — dilewati")
+    return
+  }
+
+  const kasir = await findOne("users", 'email = "kasir@posgrade.local"')
+  const customers = await api("/api/collections/customers/records", { query: { perPage: 10 } })
+  const products = await api("/api/collections/products/records", { query: { perPage: 50 } })
+
+  if (!kasir || !products.items.length) {
+    console.log("  • Data pendukung belum lengkap — dilewati")
+    return
+  }
+
+  const pad = (n) => String(n).padStart(2, "0")
+  function stamp(date) {
+    return (
+      `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ` +
+      `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
+    )
+  }
+
+  // Shift terbuka untuk kasir hari ini.
+  const shift = await upsert(
+    "shifts",
+    `cashier = "${kasir.id}" && status = "open"`,
+    { cashier: kasir.id, opened_at: stamp(new Date()), opening_cash: 200000, status: "open" },
+    "shift kasir (kas awal Rp200.000)"
+  )
+
+  const basket = [
+    [0, 2], [1, 1], [4, 3], [6, 1], [9, 2], [2, 4], [10, 1], [3, 6], [5, 2], [7, 3], [8, 1], [11, 2],
+  ]
+
+  const count = 6
+  for (let i = 0; i < count; i += 1) {
+    // Ambil 2-3 produk berbeda secara deterministik.
+    const picks = [basket[i % basket.length], basket[(i * 3 + 1) % basket.length]]
+    const unique = new Map(picks.map(([index, qty]) => [index, qty]))
+
+    let subtotal = 0
+    const lines = []
+    for (const [index, qty] of unique) {
+      const product = products.items[index % products.items.length]
+      const lineTotal = product.price * qty
+      subtotal += lineTotal
+      lines.push({
+        product: product.id,
+        product_name: product.name,
+        sku: product.sku,
+        price: product.price,
+        qty,
+        discount: 0,
+        subtotal: lineTotal,
+      })
+    }
+
+    const tax = Math.round((subtotal * 11) / 111) // harga sudah termasuk PPN 11%
+    const total = Math.round(subtotal / 100) * 100
+    const method = i % 3 === 0 ? "qris" : "cash"
+    const paid = method === "cash" ? Math.ceil(total / 10000) * 10000 : total
+
+    // Sebar transaksi ke belakang dari waktu sekarang (interval 90 menit)
+    // supaya tidak ada transaksi "di masa depan" bila seed dijalankan pagi.
+    const soldAt = new Date(Date.now() - (count - i) * 90 * 60 * 1000)
+
+    const sale = await api("/api/collections/sales/records", {
+      method: "POST",
+      body: {
+        cashier: kasir.id,
+        customer: i % 2 === 0 ? customers.items[1].id : "",
+        shift: shift.id,
+        item_count: lines.reduce((sum, l) => sum + l.qty, 0),
+        subtotal,
+        discount: 0,
+        tax,
+        total,
+        paid,
+        change: paid - total,
+        payment_method: method,
+        status: "completed",
+        sold_at: stamp(soldAt),
+      },
+    })
+
+    for (const line of lines) {
+      await api("/api/collections/sale_items/records", {
+        method: "POST",
+        body: { ...line, sale: sale.id },
+      })
+    }
+
+    console.log(`  ✓ ${sale.receipt_no} · ${lines.length} item · Rp${total.toLocaleString("id-ID")} · ${method}`)
+  }
 }
 
 main().catch((error) => {

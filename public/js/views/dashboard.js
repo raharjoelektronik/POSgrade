@@ -64,7 +64,7 @@ export function DashboardView({ outlet }) {
       summaryGrid.replaceChildren(...statCards(summary))
 
       recentBody.replaceChildren(
-        cardWithHead(
+        ...cardWithHead(
           "Transaksi Terakhir",
           dataTable({
             columns: RECENT_COLUMNS,
@@ -75,7 +75,7 @@ export function DashboardView({ outlet }) {
       )
 
       topBody.replaceChildren(
-        cardWithHead(
+        ...cardWithHead(
           "Produk Terlaris (semua waktu)",
           dataTable({
             columns: TOP_COLUMNS,
@@ -86,12 +86,12 @@ export function DashboardView({ outlet }) {
       )
 
       lowBody.replaceChildren(
-        cardWithHead(
+        ...cardWithHead(
           `Stok Menipis (${low.length})`,
           dataTable({
             columns: LOW_COLUMNS,
             rows: low.slice(0, 10),
-            empty: "Semua stok dalam kondisi aman. 🎉",
+            empty: "Semua stok dalam kondisi aman.",
           })
         )
       )

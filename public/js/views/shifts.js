@@ -165,7 +165,7 @@ export function ShiftsView({ outlet }) {
       try {
         const closed = await closeShift(shift, data.closing_cash, data.note)
         const difference = Number(closed.difference) || 0
-        if (difference === 0) notify.success("Shift ditutup. Kas sesuai. ✅")
+        if (difference === 0) notify.success("Shift ditutup. Kas sesuai.")
         else notify.warning(`Shift ditutup dengan selisih ${rupiah(difference)}.`)
         appStore.set({ shift: null })
         load()

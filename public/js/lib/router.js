@@ -22,6 +22,14 @@ export class Router {
     this.fallback = options.fallback ?? "/"
     this.notFound = options.notFound ?? null
     this.resolveAuth = options.resolveAuth ?? (() => true)
+    /**
+     * Callback pemasangan UI: dipanggil SETELAH guard lolos, sebelum view
+     * dirender. Hasilnya digabungkan ke context view sehingga view menerima
+     * `outlet` (dan `root`). Tanpa ini view tidak punya elemen untuk dirender.
+     *
+     * @type {((route: object, pathname: string) => object) | null}
+     */
+    this.mount = options.mount ?? null
     this.current = null
     this.listeners = new Set()
 
@@ -78,7 +86,8 @@ export class Router {
       if (this.notFound) {
         this.redirectDepth = 0
         this.current = { route: { path: clean }, params: {}, query }
-        this.notFound({ router: this, params: {}, query, path: clean })
+        const context = this.mount ? this.mount({ path: clean }, clean) : {}
+        this.notFound({ router: this, params: {}, query, path: clean, ...context })
         return
       }
       this._redirect(this.fallback)
@@ -110,8 +119,10 @@ export class Router {
     this.redirectDepth = 0
     this.current = { route, params, query }
 
+    const context = this.mount ? this.mount(route, clean) : {}
+
     try {
-      route.view({ router: this, params, query, route })
+      route.view({ router: this, params, query, route, ...context })
     } catch (error) {
       console.error("[router] view error:", error)
       notify.error("Terjadi kesalahan saat membuka halaman: " + error.message)

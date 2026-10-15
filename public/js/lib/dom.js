@@ -118,6 +118,30 @@ export function frag(...children) {
   return fragment
 }
 
+/**
+ * Tambahkan beberapa anak ke sebuah node, sama seperti Node.append() tetapi:
+ *   - mengabaikan null / undefined / false (Node.append() mengubahnya menjadi
+ *     teks "null" yang tampil di layar),
+ *   - meratakan array.
+ *
+ * Selalu pakai ini, jangan Node.append() langsung, bila ada anak opsional.
+ *
+ * @param {Node} parent
+ * @param {...any} children
+ * @returns {Node} parent
+ */
+export function appendAll(parent, ...children) {
+  appendChildren(parent, children)
+  return parent
+}
+
+/** Ganti seluruh isi node dengan children (aman terhadap null & array). */
+export function replaceAll(parent, ...children) {
+  clear(parent)
+  appendChildren(parent, children)
+  return parent
+}
+
 /** querySelector singkat. */
 export function qs(selector, root = document) {
   return root.querySelector(selector)

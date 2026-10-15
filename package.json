@@ -13,6 +13,7 @@
     "pb:superuser": "bash scripts/pocketbase.sh superuser create",
     "pb:migrate": "bash scripts/pocketbase.sh migrate up",
     "pb:seed": "bash scripts/pocketbase.sh migrate up && node scripts/seed.mjs",
+    "pb:seed:sales": "bash scripts/pocketbase.sh migrate up && node scripts/seed.mjs --with-sales",
     "pb:adopt-users": "node scripts/adopt-users.mjs",
     "start": "node server/index.js",
     "dev": "bash scripts/dev.sh",

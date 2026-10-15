@@ -74,15 +74,40 @@ async function bootstrap() {
   router = new Router(routes, {
     fallback: homeFor(pb.role),
     resolveAuth: () => pb,
+
+    /**
+     * Pemasangan UI. Dipanggil router setelah guard lolos, hasilnya
+     * digabungkan ke context view sebagai `outlet` dan `root`.
+     *
+     * Route publik (halaman login) dirender tanpa sidebar; route privat
+     * dirender di dalam kerangka layout.
+     */
+    mount: (route, pathname) => {
+      if (route.public) {
+        app.replaceChildren()
+        return { root: app, outlet: app }
+      }
+
+      const { outlet } = renderLayout(app, {
+        user: pb.user,
+        role: pb.role,
+        activePath: pathname,
+        onLogout: () => {
+          pb.logout()
+          router.navigate("/login", { replace: true })
+        },
+      })
+      return { root: app, outlet }
+    },
+
     notFound: (ctx) => {
-      const outlet = mountShell(ctx.path, "Tidak ditemukan")
-      outlet.appendChild(
+      ctx.outlet.appendChild(
         renderNotFound(ctx.path, () => router.navigate(homeFor(pb.role), { replace: true }))
       )
     },
   })
 
-  router.onChange((route, params, query) => {
+  router.onChange((route) => {
     // Sinkronkan judul dokumen.
     document.title = `${route.title ?? titleFor(router.path)} · ${cfg.appName}`
   })
@@ -95,25 +120,6 @@ async function bootstrap() {
   })
 
   router.start()
-}
-
-/** Render kerangka layout dan kembalikan outlet konten. */
-function mountShell(pathname, title) {
-  if (!pb.isAuthenticated) {
-    app.replaceChildren()
-    return app
-  }
-  const { outlet } = renderLayout(app, {
-    user: pb.user,
-    role: pb.role,
-    activePath: pathname,
-    title,
-    onLogout: () => {
-      pb.logout()
-      router.navigate("/login", { replace: true })
-    },
-  })
-  return outlet
 }
 
 /** Nama halaman untuk judul dokumen. */
@@ -154,4 +160,4 @@ bootstrap().catch((error) => {
 })
 
 // Ekspor helper agar bisa dipakai dari console saat development.
-window.POSgrade = { pb, cfg, getRouter: () => router, mountShell, preloadSharedData }
+window.POSgrade = { pb, cfg, getRouter: () => router, preloadSharedData }

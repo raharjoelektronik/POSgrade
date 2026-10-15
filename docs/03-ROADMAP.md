@@ -52,6 +52,11 @@ Status saat ini: **v0.1 — kerangka aplikasi yang sudah berfungsi penuh**
 
 ## Fase 4 — Kualitas teknis
 
+- [ ] **Smoke test render UI di browser** (prioritas tinggi). Uji lewat API saja
+      tidak cukup: pernah terjadi bug yang membuat seluruh UI gagal dirender
+      (`outlet` tidak diteruskan router ke view) namun semua uji API tetap hijau.
+      Rencana: skrip kecil berbasis Chrome DevTools Protocol yang membuka setiap
+      route, memastikan tidak ada error di console, lalu mengambil screenshot.
 - [ ] **Uji otomatis**: unit test untuk `lib/cart.js`, `lib/format.js`, `lib/pb.js`
       (pakai `node --test` bawaan Node, tanpa dependency).
 - [ ] Uji integrasi API untuk setiap aturan akses (regresi keamanan).

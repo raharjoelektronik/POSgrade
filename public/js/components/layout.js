@@ -3,6 +3,7 @@
  * Dipanggil ulang setiap navigasi oleh main.js.
  */
 import { h } from "../lib/dom.js"
+import { icon } from "../lib/icons.js"
 import { initials, roleLabel } from "../lib/format.js"
 import { appStore, effectiveSettings } from "../lib/store.js"
 import { cfg } from "../api.js"
@@ -12,26 +13,26 @@ export const NAV_GROUPS = [
   {
     group: "Operasional",
     items: [
-      { path: "/pos", label: "Kasir", icon: "🛒", roles: ["owner", "admin", "cashier"] },
-      { path: "/dashboard", label: "Dashboard", icon: "📊", roles: ["owner", "admin"] },
-      { path: "/sales", label: "Transaksi", icon: "🧾", roles: ["owner", "admin", "cashier"] },
+      { path: "/pos", label: "Kasir", icon: "cart", roles: ["owner", "admin", "cashier"] },
+      { path: "/dashboard", label: "Dashboard", icon: "chart", roles: ["owner", "admin"] },
+      { path: "/sales", label: "Transaksi", icon: "receipt", roles: ["owner", "admin", "cashier"] },
     ],
   },
   {
     group: "Master Data",
     items: [
-      { path: "/products", label: "Produk", icon: "📦", roles: ["owner", "admin"] },
-      { path: "/categories", label: "Kategori", icon: "🏷️", roles: ["owner", "admin"] },
-      { path: "/stock", label: "Stok", icon: "📥", roles: ["owner", "admin"] },
-      { path: "/customers", label: "Pelanggan", icon: "👥", roles: ["owner", "admin", "cashier"] },
+      { path: "/products", label: "Produk", icon: "box", roles: ["owner", "admin"] },
+      { path: "/categories", label: "Kategori", icon: "tag", roles: ["owner", "admin"] },
+      { path: "/stock", label: "Stok", icon: "inbox", roles: ["owner", "admin"] },
+      { path: "/customers", label: "Pelanggan", icon: "users", roles: ["owner", "admin", "cashier"] },
     ],
   },
   {
     group: "Sistem",
     items: [
-      { path: "/shifts", label: "Shift Kasir", icon: "🕒", roles: ["owner", "admin", "cashier"] },
-      { path: "/users", label: "Pengguna", icon: "🔑", roles: ["owner"] },
-      { path: "/settings", label: "Pengaturan", icon: "⚙️", roles: ["owner", "admin"] },
+      { path: "/shifts", label: "Shift Kasir", icon: "clock", roles: ["owner", "admin", "cashier"] },
+      { path: "/users", label: "Pengguna", icon: "key", roles: ["owner"] },
+      { path: "/settings", label: "Pengaturan", icon: "settings", roles: ["owner", "admin"] },
     ],
   },
 ]
@@ -60,7 +61,7 @@ function navLink(item, activePath, onNavigate) {
       href: "#" + item.path,
       onclick: () => onNavigate?.(item.path),
     },
-    h("span", { class: "navlink__icon", "aria-hidden": "true" }, item.icon),
+    h("span", { class: "navlink__icon" }, icon(item.icon, 18)),
     h("span", { class: "grow" }, item.label),
     badge
   )
@@ -88,7 +89,7 @@ export function renderLayout(root, options) {
     h(
       "div",
       { class: "sidebar__brand" },
-      h("span", { class: "sidebar__logo", "aria-hidden": "true" }, "₪"),
+      h("span", { class: "sidebar__logo", "aria-hidden": "true" }, icon("store", 18)),
       h("span", {}, settings.store_name || cfg.appName)
     ),
     h(
@@ -125,7 +126,7 @@ export function renderLayout(root, options) {
         "aria-label": "Buka menu",
         onclick: () => document.querySelector(".shell")?.classList.toggle("nav-open"),
       },
-      "☰"
+      icon("menu", 20)
     ),
     h("h1", { class: "topbar__title" }, pageTitle),
     h("div", { class: "topbar__spacer" }),

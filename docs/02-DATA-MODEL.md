@@ -75,7 +75,7 @@ memakai prefix timestamp unix agar PocketBase menerapkannya berurutan.
 > npm run pb:adopt-users -- --apply   # terapkan
 > ```
 >
-> Detail lengkap: [`../README.md` §3](../README.md#3-sudah-punya-pocketbase--akun-lama).
+> Detail lengkap: [`../README.md` §4](../README.md#4-sudah-punya-pocketbase--akun-lama).
 
 > ⚠️ **`emailVisibility` perlu `true`.** PocketBase menyembunyikan field `email`
 > pada koleksi auth bila `emailVisibility = false` dan yang membaca bukan pemilik

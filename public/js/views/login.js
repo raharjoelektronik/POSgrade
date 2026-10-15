@@ -2,6 +2,7 @@
  * views/login.js - halaman masuk (publik, tanpa shell sidebar).
  */
 import { h, render, setBusy } from "../lib/dom.js"
+import { icon } from "../lib/icons.js"
 import { pb, cfg } from "../api.js"
 import { notify } from "../lib/toast.js"
 import { effectiveSettings } from "../lib/store.js"
@@ -19,7 +20,7 @@ export function LoginView({ root, router }) {
     h(
       "div",
       { class: "login__brand" },
-      h("span", { class: "sidebar__logo", "aria-hidden": "true" }, "₪"),
+      h("span", { class: "sidebar__logo", "aria-hidden": "true" }, icon("store", 18)),
       h("span", {}, settings.store_name || cfg.appName)
     ),
     h("p", { class: "login__sub" }, "Masuk untuk mulai melayani transaksi."),
