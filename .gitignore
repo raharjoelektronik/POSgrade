@@ -1,0 +1,26 @@
+# --- PocketBase ---
+# Binary & data lokal (jangan commit)
+/.tools/
+/pb/pb_data/
+/pb/pocketbase
+pocketbase
+pocketbase_*
+pb_data/
+
+# --- Node ---
+node_modules/
+npm-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# --- Env / secrets ---
+.env
+.env.local
+.env.*.local
+
+# --- OS / editor ---
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/

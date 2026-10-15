@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="description" content="POSgrade - aplikasi Point of Sale sederhana, cepat, dan offline-friendly." />
+    <title>POSgrade</title>
+
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%234f46e5'/%3E%3Ctext x='16' y='22' font-size='18' text-anchor='middle' fill='white' font-family='sans-serif'%3E%24%3C/text%3E%3C/svg%3E" />
+
+    <link rel="stylesheet" href="/css/base.css" />
+    <link rel="stylesheet" href="/css/app.css" />
+  </head>
+  <body>
+    <!-- Root aplikasi: seluruh UI dirender oleh /js/main.js -->
+    <div id="app" class="boot">
+      <div class="boot__inner">
+        <div class="boot__spinner" aria-hidden="true"></div>
+        <p>Memuat POSgrade…</p>
+      </div>
+    </div>
+
+    <!-- Tempat notifikasi (toast) -->
+    <div id="toasts" class="toasts" role="status" aria-live="polite"></div>
+
+    <!-- Tempat modal dirender -->
+    <div id="modal-root"></div>
+
+    <!-- Konfigurasi runtime disuntikkan server Node (server/index.js) -->
+    <script src="/config.js"></script>
+
+    <!-- Entry point aplikasi (ES Modules native, tanpa bundler) -->
+    <script type="module" src="/js/main.js"></script>
+
+    <noscript>
+      <p style="padding: 2rem; font-family: system-ui">
+        POSgrade memerlukan JavaScript. Aktifkan JavaScript lalu muat ulang halaman.
+      </p>
+    </noscript>
+  </body>
+</html>

@@ -1,0 +1,22 @@
+{
+  "name": "posgrade",
+  "version": "0.1.0",
+  "private": true,
+  "description": "POSgrade - aplikasi Point of Sale berbasis Native HTML + Node.js + PocketBase (tanpa framework, tanpa build step)",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "setup": "bash scripts/setup-pocketbase.sh",
+    "pb": "bash scripts/pocketbase.sh serve",
+    "pb:superuser": "bash scripts/pocketbase.sh superuser create",
+    "pb:migrate": "bash scripts/pocketbase.sh migrate up",
+    "pb:seed": "bash scripts/pocketbase.sh migrate up && node scripts/seed.mjs",
+    "start": "node server/index.js",
+    "dev": "bash scripts/dev.sh",
+    "check": "node --check server/index.js && node --check server/config.js"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

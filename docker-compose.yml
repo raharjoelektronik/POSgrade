@@ -1,0 +1,62 @@
+# Docker Compose untuk POSgrade.
+#
+# Cara pakai:
+#   1. docker compose up -d --build
+#   2. Buat superuser PocketBase:
+#      docker compose exec pocketbase /pb/pocketbase superuser upsert admin@posgrade.local posgrade123
+#   3. Isi data contoh (opsional):
+#      docker compose exec web node /app/scripts/seed.mjs
+#   4. Buka http://localhost:3000
+#
+# Catatan: kredensial superuser di bawah hanya untuk pengembangan lokal.
+
+services:
+  # ------------------------------------------------------------------ PocketBase
+  pocketbase:
+    image: alpine:3.20
+    container_name: posgrade-pocketbase
+    working_dir: /pb
+    command: >
+      sh -c "apk add --no-cache curl unzip >/dev/null &&
+             [ -x /pb/pocketbase ] || (curl -fsSL -o /tmp/pb.zip
+               https://github.com/pocketbase/pocketbase/releases/download/v0.40.5/pocketbase_0.40.5_linux_amd64.zip &&
+               unzip -o /tmp/pb.zip -d /pb) &&
+             chmod +x /pb/pocketbase &&
+             exec /pb/pocketbase serve --http 0.0.0.0:8090
+               --dir /pb/pb_data
+               --migrationsDir /pb/pb_migrations
+               --hooksDir /pb/pb_hooks"
+    volumes:
+      - ./pb/pb_migrations:/pb/pb_migrations:ro
+      - ./pb/pb_hooks:/pb/pb_hooks:ro
+      - pb_data:/pb/pb_data
+    ports:
+      - "8090:8090"
+    restart: unless-stopped
+
+  # --------------------------------------------------------------- Web server
+  web:
+    image: node:22-alpine
+    container_name: posgrade-web
+    working_dir: /app
+    command: node server/index.js
+    environment:
+      HOST: 0.0.0.0
+      PORT: 3000
+      PB_URL: http://pocketbase:8090
+      DEV: "0"
+      PB_ADMIN_EMAIL: admin@posgrade.local
+      PB_ADMIN_PASSWORD: posgrade123
+    volumes:
+      - ./server:/app/server:ro
+      - ./public:/app/public:ro
+      - ./scripts:/app/scripts:ro
+      - ./package.json:/app/package.json:ro
+    ports:
+      - "3000:3000"
+    depends_on:
+      - pocketbase
+    restart: unless-stopped
+
+volumes:
+  pb_data:

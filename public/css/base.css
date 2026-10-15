@@ -1,0 +1,211 @@
+/* ==========================================================================
+   base.css - reset ringan + design token (CSS custom properties)
+   Tidak memakai framework apa pun.
+   ========================================================================== */
+
+/* --------------------------------------------------------------- 1. Reset */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  tab-size: 4;
+}
+
+body {
+  min-height: 100dvh;
+  font-family: var(--font-sans);
+  font-size: var(--fs-base);
+  line-height: 1.5;
+  color: var(--c-text);
+  background: var(--c-bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+img,
+picture,
+svg,
+video {
+  display: block;
+  max-width: 100%;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  line-height: 1.25;
+  font-weight: 650;
+  text-wrap: balance;
+}
+
+h1 { font-size: 1.5rem; }
+h2 { font-size: 1.25rem; }
+h3 { font-size: 1.05rem; }
+
+a {
+  color: var(--c-primary);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+:focus-visible {
+  outline: 2px solid var(--c-primary);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
+
+[hidden] {
+  display: none !important;
+}
+
+/* ----------------------------------------------------------- 2. Design token */
+:root {
+  /* Tipografi */
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
+    "Noto Sans", sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  --fs-xs: 0.75rem;
+  --fs-sm: 0.8125rem;
+  --fs-base: 0.9375rem;
+  --fs-lg: 1.0625rem;
+  --fs-xl: 1.375rem;
+
+  /* Warna brand */
+  --c-primary: #4f46e5;
+  --c-primary-hover: #4338ca;
+  --c-primary-soft: #eef2ff;
+  --c-accent: #0ea5e9;
+
+  /* Warna semantik */
+  --c-success: #16a34a;
+  --c-success-soft: #dcfce7;
+  --c-warning: #d97706;
+  --c-warning-soft: #fef3c7;
+  --c-danger: #dc2626;
+  --c-danger-soft: #fee2e2;
+  --c-info: #0284c7;
+  --c-info-soft: #e0f2fe;
+
+  /* Netral (light) */
+  --c-bg: #f4f5f9;
+  --c-surface: #ffffff;
+  --c-surface-2: #f8fafc;
+  --c-border: #e2e8f0;
+  --c-border-strong: #cbd5e1;
+  --c-text: #0f172a;
+  --c-text-muted: #64748b;
+  --c-text-invert: #f8fafc;
+
+  /* Sidebar */
+  --c-sidebar: #111827;
+  --c-sidebar-hover: #1f2937;
+  --c-sidebar-text: #cbd5e1;
+  --c-sidebar-active: #4f46e5;
+
+  /* Radius & bayangan */
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 16px;
+  --r-full: 999px;
+  --shadow-sm: 0 1px 2px rgb(15 23 42 / 0.06), 0 1px 3px rgb(15 23 42 / 0.08);
+  --shadow-md: 0 4px 12px rgb(15 23 42 / 0.08);
+  --shadow-lg: 0 16px 40px rgb(15 23 42 / 0.18);
+
+  /* Jarak */
+  --sp-1: 0.25rem;
+  --sp-2: 0.5rem;
+  --sp-3: 0.75rem;
+  --sp-4: 1rem;
+  --sp-5: 1.5rem;
+  --sp-6: 2rem;
+
+  --sidebar-w: 232px;
+  --header-h: 60px;
+}
+
+/* Tema gelap otomatis mengikuti preferensi sistem */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --c-bg: #0b1120;
+    --c-surface: #151c2c;
+    --c-surface-2: #1b2437;
+    --c-border: #26314a;
+    --c-border-strong: #364259;
+    --c-text: #e8edf7;
+    --c-text-muted: #93a1b8;
+    --c-primary-soft: #23244d;
+    --c-sidebar: #0d1424;
+    --c-sidebar-hover: #1a2338;
+    --c-success-soft: #0f2e1c;
+    --c-warning-soft: #3a2a0c;
+    --c-danger-soft: #3b1517;
+    --c-info-soft: #0b2c40;
+  }
+}
+
+/* ------------------------------------------------- 3. Boot / loading state */
+.boot {
+  display: grid;
+  place-items: center;
+  min-height: 100dvh;
+}
+
+.boot__inner {
+  display: grid;
+  justify-items: center;
+  gap: var(--sp-3);
+  color: var(--c-text-muted);
+}
+
+.boot__spinner {
+  width: 30px;
+  height: 30px;
+  border: 3px solid var(--c-border);
+  border-top-color: var(--c-primary);
+  border-radius: var(--r-full);
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
