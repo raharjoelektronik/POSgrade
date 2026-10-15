@@ -21,14 +21,16 @@ Semua gambar di bawah diambil otomatis dari aplikasi yang benar-benar berjalan
 | ![Login](docs/screenshots/01-login.png) | ![Dashboard](docs/screenshots/02-dashboard.png) |
 | **Kasir — keranjang** | **Kasir — pembayaran** |
 | ![Kasir](docs/screenshots/04-kasir-keranjang.png) | ![Pembayaran](docs/screenshots/05-kasir-pembayaran.png) |
-| **Produk** | **Riwayat Transaksi** |
-| ![Produk](docs/screenshots/06-produk.png) | ![Transaksi](docs/screenshots/09-transaksi.png) |
-| **Stok & audit mutasi** | **Shift kasir** |
-| ![Stok](docs/screenshots/10-stok.png) | ![Shift](docs/screenshots/11-shift.png) |
-| **Pengguna & peran** | **Tampilan tablet kasir (820px)** |
-| ![Pengguna](docs/screenshots/12-pengguna.png) | ![Tablet](docs/screenshots/14-kasir-tablet.png) |
+| **Struk setelah transaksi** | **Produk** |
+| ![Struk](docs/screenshots/17-struk-setelah-bayar.png) | ![Produk](docs/screenshots/06-produk.png) |
+| **Riwayat Transaksi** | **Stok & audit mutasi** |
+| ![Transaksi](docs/screenshots/09-transaksi.png) | ![Stok](docs/screenshots/10-stok.png) |
+| **Shift kasir** | **Pengguna & peran** |
+| ![Shift](docs/screenshots/11-shift.png) | ![Pengguna](docs/screenshots/12-pengguna.png) |
+| **Tampilan tablet kasir (820px)** | **Kategori & pelanggan** |
+| ![Tablet](docs/screenshots/14-kasir-tablet.png) | ![Kategori](docs/screenshots/07-kategori.png) |
 
-Seluruh 14 gambar ada di [`docs/screenshots/`](docs/screenshots/).
+Seluruh 17 gambar ada di [`docs/screenshots/`](docs/screenshots/).
 
 ---
 
