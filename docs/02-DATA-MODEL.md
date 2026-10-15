@@ -64,6 +64,25 @@ memakai prefix timestamp unix agar PocketBase menerapkannya berurutan.
 | `role` | select | **Tambahan** — `owner` \| `admin` \| `cashier` |
 | `active` | bool | **Tambahan** — akun nonaktif ditolak saat login |
 
+> ⚠️ **`role` dan `active` bersifat wajib secara praktis.** Semua API Rule
+> bergantung pada `@request.auth.role`, dan halaman login menolak akun dengan
+> `active = false`. User yang dibuat di instance PocketBase lain (atau sebelum
+> migration `1750000004_extend_users`) belum punya kedua field ini, sehingga
+> tidak bisa memakai aplikasi. Perbaiki dengan:
+>
+> ```bash
+> npm run pb:adopt-users              # pratinjau
+> npm run pb:adopt-users -- --apply   # terapkan
+> ```
+>
+> Detail lengkap: [`../README.md` §3](../README.md#3-sudah-punya-pocketbase--akun-lama).
+
+> ⚠️ **`emailVisibility` perlu `true`.** PocketBase menyembunyikan field `email`
+> pada koleksi auth bila `emailVisibility = false` dan yang membaca bukan pemilik
+> record tersebut. Akibatnya daftar Pengguna dan kolom "Kasir" di riwayat
+> transaksi tampil kosong. `seed.mjs`, `adopt-users.mjs`, dan form Pengguna di
+> aplikasi semuanya menyalakan opsi ini untuk akun staf internal.
+
 ### 3.2 `categories`
 
 | Field | Tipe | Keterangan |

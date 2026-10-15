@@ -116,6 +116,10 @@ async function main() {
         role: user.role,
         active: true,
         verified: true,
+        // PocketBase menyembunyikan field `email` pada koleksi auth bila
+        // emailVisibility = false, sehingga daftar pengguna & kolom kasir
+        // di riwayat transaksi akan kosong. Untuk akun staf internal, nyalakan.
+        emailVisibility: true,
       },
       `${user.email} (${user.role}) — sandi: posgrade123`
     )

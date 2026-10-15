@@ -176,7 +176,15 @@ export function UsersView({ outlet }) {
           "div",
           { class: "span-2 row row--wrap" },
           checkboxInput({ name: "active", label: "Aktif", checked: record ? Boolean(record.active) : true }),
-          checkboxInput({ name: "verified", label: "Email terverifikasi", checked: true })
+          checkboxInput({ name: "verified", label: "Email terverifikasi", checked: true }),
+          checkboxInput({
+            name: "emailVisibility",
+            label: "Tampilkan email ke pengguna lain",
+            checked: record ? Boolean(record.emailVisibility) : true,
+            title:
+              "PocketBase menyembunyikan field email pada koleksi auth bila opsi ini mati, " +
+              "sehingga daftar pengguna dan kolom kasir di riwayat transaksi menjadi kosong.",
+          })
         )
       )
     )
@@ -211,6 +219,7 @@ export function UsersView({ outlet }) {
         role: data.role,
         active: Boolean(data.active),
         verified: Boolean(data.verified),
+        emailVisibility: Boolean(data.emailVisibility),
       }
 
       if (data.password) {

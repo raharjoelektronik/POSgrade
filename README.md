@@ -56,13 +56,107 @@ npm start                  # jalankan hanya web server Node
 npm run pb                 # jalankan hanya PocketBase
 npm run pb:migrate         # terapkan migration secara manual
 npm run pb:seed            # isi data contoh (idempotent)
+npm run pb:adopt-users     # perbaiki user PocketBase lama agar bisa dipakai (lihat §3)
 npm run pb:superuser -- admin@toko.id rahasia123
 npm run check              # cek sintaks server
 ```
 
 ---
 
-## 3. Struktur proyek
+## 3. Sudah punya PocketBase / akun lama?
+
+**PocketBase tidak punya akun "cloud".** Setiap akun — baik *superuser* (untuk
+dashboard `/_/`) maupun *user* (untuk aplikasi) — tersimpan di dalam file
+`pb_data/data.db` milik instance itu sendiri. Jadi jawabannya bergantung pada
+akun lamanya ada di mana:
+
+| Situasi | Bisa dipakai langsung? |
+| --- | --- |
+| Akun lama ada di **pb_data yang sama** yang dipakai project ini | ✅ Ya |
+| Akun lama ada di **instance PocketBase lain** (server lain, project lain) | ❌ Tidak otomatis — perlu salah satu dari 3 opsi di bawah |
+| Akun aplikasi lama (koleksi `users`) yang belum punya field `role` | ❌ Belum — jalankan `npm run pb:adopt-users -- --apply` |
+
+Ada **dua jenis akun** yang jangan dicampur:
+
+| Jenis | Koleksi | Dipakai untuk |
+| --- | --- | --- |
+| **Superuser** | `_superusers` | Login dashboard PocketBase `/_/`, akses penuh |
+| **User** | `users` | Login aplikasi POSgrade; punya `role` (owner/admin/cashier) |
+
+### Opsi A — Pakai instance PocketBase lama Anda sebagai backend
+
+Project ini bisa diarahkan ke PocketBase mana pun. Cukup ubah `.env`:
+
+```bash
+PB_URL=https://pb.domain-anda.com      # atau http://IP-lama:8090
+PB_ADMIN_EMAIL=superuser-lama@anda.com
+PB_ADMIN_PASSWORD=sandi-lama
+```
+
+Lalu terapkan skema POSgrade ke instance tersebut (tanpa menyentuh data lama):
+
+```bash
+.tools/pocketbase migrate up \
+  --dir /path/ke/pb_data-lama \
+  --migrationsDir ./pb/pb_migrations \
+  --hooksDir ./pb/pb_hooks
+```
+
+⚠️ Perhatikan: migration `1750000004_extend_users` akan **gagal** bila koleksi
+`users` lama Anda sudah punya field bernama `role`, `active`, `full_name`, atau
+`phone` (error *duplicate field name*), dan migration `1750000006_users_rules`
+akan **menimpa API Rules** koleksi `users` lama Anda. Bila salah satu kondisi itu
+terjadi, lebih aman pakai Opsi C.
+
+### Opsi B — Bawa pb_data lama ke project ini
+
+```bash
+cp -r /path/ke/pb_data-lama/. ./pb/pb_data/
+npm run pb:migrate
+npm run pb:adopt-users          # pratinjau dulu, lalu tambahkan --apply
+```
+
+Hash kata sandi (bcrypt) ikut berpindah, jadi **sandi lama tetap berlaku**.
+Risiko skema sama dengan Opsi A.
+
+### Opsi C — Instance baru (paling bersih, direkomendasikan)
+
+```bash
+npm run pb:superuser -- email-anda@domain.com sandi-kuat   # superuser baru
+```
+
+Lalu buat user POS pertama dengan `role = owner` dari salah satu cara:
+
+- Dashboard `http://127.0.0.1:8090/_/` → Collections → `users` → **New record**
+  (isi `email`, `password`, `role = owner`, `active = true`), atau
+- setelah login sebagai owner, buka halaman **Pengguna** (`#/users`) di aplikasi.
+
+### Mengadopsi user lama: `scripts/adopt-users.mjs`
+
+User yang dibuat di instance lain belum punya `role` dan `active`, sehingga:
+
+- `active` bernilai `false` → halaman login menolak: *"Akun Anda sedang dinonaktifkan"*.
+- `role` kosong → login berhasil tapi hak akses kosong (hampir semua tulis ditolak API Rules).
+
+Skrip ini **hanya mengisi field yang kosong** — nilai yang sudah ada tidak diubah:
+
+```bash
+npm run pb:adopt-users                        # pratinjau (dry-run), tidak menulis apa pun
+npm run pb:adopt-users -- --apply             # terapkan, role default = cashier
+npm run pb:adopt-users -- --apply --role=owner
+npm run pb:adopt-users -- --apply --only=email@toko.id
+```
+
+### Yang tidak ikut berpindah
+
+- **Token sesi lama** — token ditandatangani dengan `authTokenSecret` milik
+  instance, jadi pengguna harus login ulang.
+- **Sandi bila Anda membuat ulang akun** (bukan memindahkan `pb_data`) — buat
+  user baru dengan email sama tidak mewarisi sandi lama; harus diset ulang.
+
+---
+
+## 4. Struktur proyek
 
 ```
 .
@@ -83,13 +177,14 @@ npm run check              # cek sintaks server
 ├── pb/
 │   ├── pb_migrations/          # 7 migration: schema + pengaturan default + rule users
 │   └── pb_hooks/main.pb.js     # logika server: nomor struk, stok otomatis, void
-├── scripts/                    # setup-pocketbase.sh, pocketbase.sh, dev.sh, seed.mjs
+├── scripts/                    # setup-pocketbase.sh, pocketbase.sh, dev.sh,
+│                               # seed.mjs, adopt-users.mjs
 └── docs/                       # RENCANA, ARSITEKTUR, DATA-MODEL, ROADMAP
 ```
 
 ---
 
-## 4. Arsitektur singkat
+## 5. Arsitektur singkat
 
 ```
 Browser (HTML/JS native)
@@ -107,7 +202,7 @@ yang diteruskan server Node. Penjelasan lengkap: [`docs/01-ARSITEKTUR.md`](docs/
 
 ---
 
-## 5. Keamanan & hak akses
+## 6. Keamanan & hak akses
 
 Aturan akses ditegakkan di **server PocketBase** (API Rules), bukan hanya di UI:
 
@@ -126,7 +221,7 @@ Kredensial superuser hanya dipakai skrip CLI (`scripts/seed.mjs`) dan
 
 ---
 
-## 6. Dokumentasi
+## 7. Dokumentasi
 
 | Dokumen | Isi |
 | --- | --- |
@@ -137,7 +232,7 @@ Kredensial superuser hanya dipakai skrip CLI (`scripts/seed.mjs`) dan
 
 ---
 
-## 7. Menuju produksi
+## 8. Menuju produksi
 
 1. Buat superuser sungguhan lalu hapus akun demo (`npm run pb:superuser -- ...`).
 2. Set `DEV=0`, bind ke `0.0.0.0`, dan letakkan di belakang reverse proxy HTTPS (Caddy/Nginx).
@@ -147,7 +242,7 @@ Kredensial superuser hanya dipakai skrip CLI (`scripts/seed.mjs`) dan
 
 ---
 
-## 8. Alternatif: Docker
+## 9. Alternatif: Docker
 
 ```bash
 docker compose up -d --build

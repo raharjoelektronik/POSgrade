@@ -26,9 +26,16 @@ import { SettingsView } from "./views/settings.js"
 
 const app = document.getElementById("app")
 
-/** Halaman default per peran. */
+/**
+ * Halaman default per peran.
+ * Peran kosong/tak dikenal diarahkan ke /pos karena halaman itu tidak
+ * dibatasi peran — mencegah pengalihan berulang pada akun lama yang
+ * belum diberi `role`.
+ */
 function homeFor(role) {
-  return role === "cashier" ? "/pos" : "/dashboard"
+  if (role === "cashier") return "/pos"
+  if (role === "owner" || role === "admin") return "/dashboard"
+  return "/pos"
 }
 
 const routes = [

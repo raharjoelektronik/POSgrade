@@ -81,6 +81,18 @@ export function LoginView({ root, router }) {
         throw new Error("Akun Anda sedang dinonaktifkan. Hubungi pemilik toko.")
       }
 
+      // Akun dari instance PocketBase lain (atau dibuat sebelum migrasi
+      // `1750000004_extend_users`) belum punya `role`. Tanpa peran, hampir
+      // semua API Rule akan menolak, jadi lebih baik berhenti dengan pesan
+      // jelas daripada membiarkan pengguna masuk ke aplikasi yang kosong.
+      if (!pb.user?.role) {
+        pb.logout()
+        throw new Error(
+          "Akun Anda belum diberi peran (owner/admin/kasir). Hubungi pemilik toko, " +
+            "atau jalankan: node scripts/adopt-users.mjs --apply"
+        )
+      }
+
       // Muat data bersama sebelum masuk supaya halaman pertama sudah siap.
       await Promise.all([
         loadSettings({ force: true }),

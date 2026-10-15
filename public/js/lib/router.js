@@ -76,11 +76,12 @@ export class Router {
     const match = this.match(clean)
     if (!match) {
       if (this.notFound) {
+        this.redirectDepth = 0
         this.current = { route: { path: clean }, params: {}, query }
         this.notFound({ router: this, params: {}, query, path: clean })
         return
       }
-      this.navigate(this.fallback, { replace: true })
+      this._redirect(this.fallback)
       return
     }
 
@@ -89,23 +90,24 @@ export class Router {
 
     // --- Guard: halaman privat saat belum login -------------------------
     if (!route.public && !auth.isAuthenticated) {
-      this.navigate("/login", { replace: true })
+      this._redirect("/login")
       return
     }
 
     // --- Guard: sudah login tapi membuka halaman publik (login) ---------
     if (route.public && auth.isAuthenticated) {
-      this.navigate(this.fallback, { replace: true })
+      this._redirect(this.fallback)
       return
     }
 
     // --- Guard: peran pengguna -----------------------------------------
     if (route.roles && !route.roles.includes(auth.role)) {
       notify.error("Anda tidak memiliki akses ke halaman tersebut.")
-      this.navigate(this.fallback, { replace: true })
+      this._redirect(this.fallback)
       return
     }
 
+    this.redirectDepth = 0
     this.current = { route, params, query }
 
     try {
@@ -118,6 +120,28 @@ export class Router {
     for (const listener of this.listeners) {
       listener(route, params, query)
     }
+  }
+
+  /**
+   * Alihkan halaman dengan perlindungan loop.
+   *
+   * Tanpa ini, fallback yang juga ditolak guard (mis. pengguna tanpa `role`
+   * yang selalu diarahkan ke halaman khusus owner/admin) akan memicu
+   * rekursi tanpa henti dan membekukan browser.
+   */
+  _redirect(path) {
+    this.redirectDepth = (this.redirectDepth ?? 0) + 1
+
+    if (this.redirectDepth > 3) {
+      console.error(
+        `[router] pengalihan berulang terdeteksi menuju "${path}". ` +
+          "Periksa peran (role) pengguna atau konfigurasi guard route."
+      )
+      this.redirectDepth = 0
+      return
+    }
+
+    this.navigate(path, { replace: true })
   }
 
   /** Cocokkan path dengan daftar route; mendukung segmen dinamis ":id". */
